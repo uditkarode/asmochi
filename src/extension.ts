@@ -28,7 +28,7 @@ export const hoverProvider: HoverProvider = {
   },
 };
 
-const motivationalMessage = "今日の失敗が、明日の君を強くする。";
+const divineMessage = "今日の失敗が、明日の君を強くする。";
 
 export function activate(context: vscode.ExtensionContext) {
   const registeredLanguages = new Set<string>();
@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 
           items.push({
             range: diagnostic.range,
-            contents: [motivationalMessage],
+            contents: [divineMessage],
           });
         }
 
