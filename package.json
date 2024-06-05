@@ -3,7 +3,7 @@
   "publisher": "soyokaze",
   "displayName": "明日へのモチベ",
   "description": "問題の時にささやかな言葉を",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "license": "MIT",
   "engines": {
     "vscode": "^1.89.0"
