@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 import { HoverProvider } from "vscode";
 
 const uriStore: Record<
@@ -31,34 +31,47 @@ export const hoverProvider: HoverProvider = {
 const motivationalMessage = "今日の失敗が、明日の君を強くする。";
 
 export function activate(context: vscode.ExtensionContext) {
-	const registeredLanguages = new Set<string>();
+  const registeredLanguages = new Set<string>();
 
-	context.subscriptions.push(
-		vscode.languages.onDidChangeDiagnostics(async (e) => {
-			e.uris.forEach((uri) => {
-				const diagnostics = vscode.languages.getDiagnostics(uri);
+  context.subscriptions.push(
+    vscode.languages.onDidChangeDiagnostics(async (e) => {
+      e.uris.forEach((uri) => {
+        const diagnostics = vscode.languages.getDiagnostics(uri);
 
-				uriStore[uri.fsPath] = diagnostics.map((diagnostic) => ({
-					range: diagnostic.range,
-					contents: [motivationalMessage],
-				}));
+        const items: {
+          range: vscode.Range;
+          contents: string[];
+        }[] = [];
 
-				const editor = vscode.window.visibleTextEditors.find(
-					(editor) => editor.document.uri.toString() === uri.toString()
-				);
+        for (const diagnostic of diagnostics) {
+          if (items.find((item) => item.range.isEqual(diagnostic.range))) {
+            continue;
+          }
 
-				if (editor && !registeredLanguages.has(editor.document.languageId)) {
-					registeredLanguages.add(editor.document.languageId);
-					context.subscriptions.push(
-						vscode.languages.registerHoverProvider(
-							{
-								language: editor.document.languageId,
-							},
-							hoverProvider
-						)
-					);
-				}
-			});
-		}
-	));
+          items.push({
+            range: diagnostic.range,
+            contents: [motivationalMessage],
+          });
+        }
+
+        uriStore[uri.fsPath] = items;
+
+        const editor = vscode.window.visibleTextEditors.find(
+          (editor) => editor.document.uri.toString() === uri.toString()
+        );
+
+        if (editor && !registeredLanguages.has(editor.document.languageId)) {
+          registeredLanguages.add(editor.document.languageId);
+          context.subscriptions.push(
+            vscode.languages.registerHoverProvider(
+              {
+                language: editor.document.languageId,
+              },
+              hoverProvider
+            )
+          );
+        }
+      });
+    })
+  );
 }
