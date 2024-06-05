@@ -3,7 +3,7 @@
   "publisher": "soyokaze",
   "displayName": "明日へのモチベ",
   "description": "問題の時にささやかな言葉を",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "license": "MIT",
   "engines": {
     "vscode": "^1.89.0"
@@ -14,12 +14,7 @@
   "activationEvents": ["*"],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "asmochi.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+    "commands": []
   },
   "scripts": {
     "vscode:prepublish": "yarn run package",
