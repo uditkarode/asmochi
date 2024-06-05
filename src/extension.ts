@@ -1,26 +1,64 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { HoverProvider } from "vscode";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+const uriStore: Record<
+  vscode.Uri["path"],
+  {
+    range: vscode.Range;
+    contents: string[];
+  }[]
+> = {};
+
+export const hoverProvider: HoverProvider = {
+  provideHover(document, position) {
+    const itemsInUriStore = uriStore[document.uri.fsPath];
+
+    if (!itemsInUriStore) {
+      return null;
+    }
+
+    const itemInRange = itemsInUriStore.filter((item) =>
+      item.range.contains(position)
+    );
+
+    return {
+      range: itemInRange?.[0]?.range,
+      contents: itemInRange.flatMap((item) => item.contents),
+    };
+  },
+};
+
+const motivationalMessage = "今日の失敗が、明日の君を強くする。";
+
 export function activate(context: vscode.ExtensionContext) {
+	const registeredLanguages = new Set<string>();
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "asmochi" is now active!');
+	context.subscriptions.push(
+		vscode.languages.onDidChangeDiagnostics(async (e) => {
+			e.uris.forEach((uri) => {
+				const diagnostics = vscode.languages.getDiagnostics(uri);
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('asmochi.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from 明日へのモチベ!');
-	});
+				uriStore[uri.fsPath] = diagnostics.map((diagnostic) => ({
+					range: diagnostic.range,
+					contents: [motivationalMessage],
+				}));
 
-	context.subscriptions.push(disposable);
+				const editor = vscode.window.visibleTextEditors.find(
+					(editor) => editor.document.uri.toString() === uri.toString()
+				);
+
+				if (editor && !registeredLanguages.has(editor.document.languageId)) {
+					registeredLanguages.add(editor.document.languageId);
+					context.subscriptions.push(
+						vscode.languages.registerHoverProvider(
+							{
+								language: editor.document.languageId,
+							},
+							hoverProvider
+						)
+					);
+				}
+			});
+		}
+	));
 }
-
-// This method is called when your extension is deactivated
-export function deactivate() {}
