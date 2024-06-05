@@ -3,6 +3,7 @@
   "displayName": "明日へのモチベ",
   "description": "hear what you need to hear when you need to hear it",
   "version": "0.0.1",
+  "license": "MIT",
   "engines": {
     "vscode": "^1.89.0"
   },
